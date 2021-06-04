@@ -12,7 +12,7 @@
         <div>
             <asp:GridView ID="CustomersGridView" runat="server" AutoGenerateColumns="False" DataKeyNames="Id" DataSourceID="TradeCompanyDataSource" AutoGenerateSelectButton="True">
                 <Columns>
-                    <asp:BoundField DataField="Id" HeaderText="Id заказчика" InsertVisible="False" ReadOnly="True" SortExpression="Id" />
+                    <asp:BoundField DataField="Id" HeaderText="Номер" InsertVisible="False" ReadOnly="True" SortExpression="Id" />
                     <asp:BoundField DataField="Name" HeaderText="Имя" SortExpression="Name" />
                     <asp:BoundField DataField="Surname" HeaderText="Фамилия" SortExpression="Surname" />
                     <asp:BoundField DataField="YearOfBirth" HeaderText="Год рождения" SortExpression="YearOfBirth" />
@@ -22,20 +22,57 @@
             <br />
             <asp:GridView ID="CustomerOrdersGridView" runat="server" AutoGenerateColumns="False" DataKeyNames="Id" DataSourceID="TradeCompanyDataSource2">
                 <Columns>
-                    <asp:BoundField DataField="Id" HeaderText="Id заказа" InsertVisible="False" ReadOnly="True" SortExpression="Id" />
+                    <asp:BoundField DataField="Id" HeaderText="Номер заказа" InsertVisible="False" ReadOnly="True" SortExpression="Id" />
                     <asp:BoundField DataField="Title" HeaderText="Товар" SortExpression="Title" />
-                    <asp:BoundField DataField="CustomerId" HeaderText="Id заказчика" SortExpression="CustomerId" />
+                    <asp:BoundField DataField="CustomerId" HeaderText="Номер заказчика" SortExpression="CustomerId" ReadOnly="True" />
                     <asp:BoundField DataField="Price" HeaderText="Цена" SortExpression="Price" />
                     <asp:BoundField DataField="Count" HeaderText="Количество" SortExpression="Count" />
                 </Columns>
             </asp:GridView>
-            <asp:SqlDataSource ID="TradeCompanyDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:TradeCompanyDbConnectionString %>" SelectCommand="SELECT * FROM [Orders] WHERE ([CustomerId] = @CustomerId)">
+            <asp:SqlDataSource ID="TradeCompanyDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:TradeCompanyDbConnectionString %>" SelectCommand="SELECT * FROM [Orders] WHERE ([CustomerId] = @CustomerId)" InsertCommand="INSERT INTO ORDERS (Title, CustomerId, Price, Count)
+VALUES (@Title, @CustomerId, @Price, @Count)" UpdateCommand="UPDATE ORDERS 
+SET Title = @Title, CustomerId = @CustomerId, Price = @Price, Count = @Count
+WHERE Id = @Id
+" DeleteCommand="DELETE FROM ORDERS 
+WHERE Id = @Id">
+                <DeleteParameters>
+                    <asp:ControlParameter ControlID="CustomerOrdersGridView" Name="Id" PropertyName="SelectedValue" />
+                </DeleteParameters>
+                <InsertParameters>
+                    <asp:ControlParameter ControlID="Order_Name" Name="Title" PropertyName="Text" />
+                    <asp:ControlParameter ControlID="CustomersGridView" Name="CustomerId" PropertyName="SelectedValue" />
+                    <asp:ControlParameter ControlID="Order_Price" Name="Price" PropertyName="Text" Type="Decimal"/>
+                    <asp:ControlParameter ControlID="Order_Count" Name="Count" PropertyName="Text" />
+                </InsertParameters>
                 <SelectParameters>
                     <asp:ControlParameter ControlID="CustomersGridView" Name="CustomerId" PropertyName="SelectedValue" Type="Int32" />
                 </SelectParameters>
+                <UpdateParameters>
+                    <asp:ControlParameter ControlID="CustomerOrdersGridView" Name="Title" PropertyName="SelectedValue" />
+                    <asp:ControlParameter ControlID="CustomersGridView" Name="CustomerId" PropertyName="SelectedValue" />
+                    <asp:ControlParameter ControlID="CustomerOrdersGridView" Name="Price" PropertyName="SelectedValue" Type="Decimal"/>
+                    <asp:ControlParameter ControlID="CustomerOrdersGridView" Name="Count" PropertyName="SelectedValue" />
+                    <asp:ControlParameter ControlID="CustomerOrdersGridView" Name="Id" PropertyName="SelectedValue" />
+                </UpdateParameters>
             </asp:SqlDataSource>
+            <asp:Button ID="Add_Order_Btn" runat="server" OnClick="Add_Order_Btn_Click" Text="Добавить заказ" />
+            <asp:Button ID="Update_Order_Btn" runat="server" Text="Редактировать заказы" OnClick="Update_Order_Btn_Click" />
+            <asp:Button ID="Delete_Order_Btn" runat="server" OnClick="Delete_Order_Btn_Click" Text="Удалить заказ" />
             <br />
         </div>
+        <asp:Panel ID="Add_Order_Pnl" runat="server" Visible="False">
+            Название товара:
+            <asp:TextBox ID="Order_Name" runat="server"></asp:TextBox>
+            <br />
+            Цена:
+            <asp:TextBox ID="Order_Price" runat="server"></asp:TextBox>
+            <br />
+            Количество:
+            <asp:TextBox ID="Order_Count" runat="server"></asp:TextBox>
+            <br />
+            <asp:Button ID="Add_Btn" runat="server" OnClick="Add_Btn_Click" Text="Добавить" />
+            <asp:Button ID="Clean_Btn" runat="server" OnClick="Clean_Btn_Click" Text="Отменить" />
+        </asp:Panel>
     </form>
 </body>
 </html>
